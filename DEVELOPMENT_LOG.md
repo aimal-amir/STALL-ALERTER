@@ -13,7 +13,7 @@ I used AI to help break down the assignment, define the first-version scope, and
 - Flag candidates inactive for at least 7 days by default.
 - Exclude Hired, Rejected, and Withdrawn candidates.
 - Prioritize candidates by longest inactivity.
-- Use transparent rules without an AI API.
+- Use transparent rules without an AI API
 
 ### Data improvements
 Reviewing my initial CSV with AI identified a misspelled role column, a missing stage column, and ambiguous date formatting. The revised sample uses the required columns and YYYY-MM-DD dates.
