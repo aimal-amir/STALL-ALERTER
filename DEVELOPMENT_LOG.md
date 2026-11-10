@@ -61,3 +61,37 @@ A successful upload alone does not prove that the tool works correctly. Testing 
 
 ### Next step
 Get feedback from another person on whether the results and suggested actions are easy to understand.
+
+## November 10, 2026 — Final follow-up mechanism and delivery
+
+### Goal
+Finish the mechanism for deciding which stalled candidate to follow up with first and what action to take.
+
+### How I used AI
+I used AI to review the existing implementation, make the priority rules explicit, implement the follow-up queue, investigate a runtime error, and document the final project behavior.
+
+### Changes completed
+- Kept longest inactivity as the primary priority rule.
+- Added a stage tie breaker: Offer, Interview, Screening, Applied, then other active stages. Remaining ties preserve CSV order.
+- Added numbered follow-up ranks, days beyond the threshold, priority explanations, and suggested contact roles.
+- Highlighted the first candidate above the results table with their suggested contact and next action.
+- Kept closed-stage exclusions, input validation, and the adjustable inactivity threshold.
+- Updated `INTENT.md` and `README.md` to explain the final mechanism.
+- Created `DIRECTIVE.md` with the final workflow, input requirements, ranking rules, actions, scope, and acceptance criteria.
+
+### Error found and correction
+The running app raised `KeyError: 'follow_up_with'` when displaying the first candidate. The code on disk already produced that column, suggesting that Streamlit had retained the older imported logic while rerunning the updated interface. The app now reloads the logic module on reruns so the interface and result columns stay synchronized.
+
+The original UI test only checked the screen before an upload. I added a regression test that simulates stale imported logic, uploads CSV content, and checks that the first-candidate message and follow-up table render successfully.
+
+### Verification
+Ran `.venv/bin/python -m unittest -v`: all 6 tests passed after the fix. The checks cover threshold boundaries, closed stages, unknown stages, ordering and ties, contact and action output, invalid data, the initial screen, and the uploaded-CSV path with stale logic. `git diff --check` also passed for the follow-up implementation.
+
+### Delivery
+Created the `final` branch and pushed it to `origin/final` on GitHub. The implementation and `DIRECTIVE.md` were already committed when the branch was created. This log entry was added after that push.
+
+### What I learned
+Passing logic tests and an empty-screen UI test did not verify the complete upload workflow. Testing the path that actually displays results helped catch the integration gap. Explicit ranks and contact suggestions also make the existing inactivity rule easier to act on.
+
+### Final scope and limitations
+The tool recommends workflow follow-up; a human reviews the latest notes and performs the action. Contacts are responsibility labels rather than named owners. It reads CSV exports and does not update a live sheet or send messages. Ranking does not account for deadlines, role urgency, intentional holds, weekends, or holidays.
