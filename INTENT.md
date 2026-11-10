@@ -20,7 +20,7 @@ A user can upload a CSV, choose an inactivity threshold, and see:
 - Why each candidate was flagged.
 - A suggested next action based on their hiring stage.
 
-Candidates are ordered by longest inactivity first. A human reviews the recommendations and handles follow-up.
+Candidates are ordered by longest inactivity first. Equal inactivity is ordered by Offer, Interview, Screening, Applied, then other stages; remaining ties preserve CSV order. The queue shows a numbered rank, suggested contact, and next action. A human reviews the recommendations and handles follow-up.
 
 ## Why I chose this scope
 

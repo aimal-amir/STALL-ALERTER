@@ -70,6 +70,10 @@ All sample candidates are fictional.
 4. Exclude Hired, Rejected, and Withdrawn stages.
 5. Ignore capitalization and surrounding spaces when checking stages.
 6. Sort flagged candidates by days inactive, descending.
+7. For equal inactivity, follow up in stage order: Offer, Interview, Screening, Applied, then other active stages. Candidates still tied keep their CSV order.
+8. Assign a numbered follow-up order and show days beyond the threshold, the priority rule, the suggested contact, and next action. Highlight the first candidate above the table.
+
+This queue prioritizes workflow follow-up, not candidate suitability. Stage is only a tie breaker: an older Applied candidate still comes before a newer Offer candidate. Contact labels describe suggested responsibilities; the CSV does not identify actual owners. Review the latest notes before acting.
 
 The threshold must be a positive whole number and defaults to 7.
 
@@ -223,5 +227,5 @@ Record actual observations and completed checks.
 - Calendar days do not account for weekends or holidays.
 - Results depend on accurate activity dates.
 - Some delays may be intentional and require human judgment.
-- Follow-up priority is based only on inactivity.
+- Follow-up priority uses inactivity, with hiring stage to break ties. No deadlines, role urgency, or actual owner information are available in the current CSV.
 - Today's date comes from the machine running the app.

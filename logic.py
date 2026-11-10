@@ -6,6 +6,14 @@ import pandas as pd
 
 REQUIRED_COLUMNS = ("candidate_name", "role", "stage", "last_activity_date")
 CLOSED_STAGES = {"hired", "rejected", "withdrawn"}
+# Stage only breaks ties in inactivity; unfamiliar stages keep their CSV order.
+STAGE_ORDER = {"offer": 0, "interview": 1, "screening": 2, "applied": 3}
+FOLLOW_UP_WITH = {
+    "applied": "Recruiter / application reviewer",
+    "screening": "Screening owner",
+    "interview": "Interviewer / hiring manager",
+    "offer": "Offer owner, then candidate",
+}
 ACTIONS = {
     "applied": "Review the application and decide the next step.",
     "screening": "Check screening progress and arrange the next step.",
@@ -76,7 +84,7 @@ def validate_data(data, today=None):
 
 
 def detect_stalled(data, threshold=7, today=None):
-    """Validate all rows, exclude closed stages, and sort by calendar days inactive."""
+    """Build a follow-up queue by inactivity, then stage, then original CSV order."""
     if isinstance(threshold, bool) or not isinstance(threshold, Integral) or threshold < 1:
         raise ValidationError("The inactivity threshold must be a positive whole number.")
     today = today or date.today()
@@ -90,4 +98,16 @@ def detect_stalled(data, threshold=7, today=None):
     result["explanation"] = result.apply(
         lambda row: f"{row['candidate_name']} has been inactive for {row['days_inactive']} days, meeting the {threshold}-day follow-up threshold.", axis=1
     ) if not result.empty else pd.Series(dtype=str)
-    return result.sort_values("days_inactive", ascending=False, kind="stable").reset_index(drop=True)
+    result["follow_up_with"] = result["stage"].str.casefold().map(FOLLOW_UP_WITH).fillna(
+        "Recruiter / current stage owner"
+    )
+    result["days_over_threshold"] = result["days_inactive"] - threshold
+    result["_stage_order"] = result["stage"].str.casefold().map(STAGE_ORDER).fillna(4)
+    result = result.sort_values(
+        ["days_inactive", "_stage_order"], ascending=[False, True], kind="stable"
+    ).drop(columns="_stage_order").reset_index(drop=True)
+    result["follow_up_rank"] = range(1, len(result) + 1)
+    result["priority_reason"] = result["days_over_threshold"].map(
+        lambda days: f"{days} day(s) beyond the follow-up threshold. Longest inactivity first; ties use Offer, Interview, Screening, Applied, then other stages."
+    )
+    return result
